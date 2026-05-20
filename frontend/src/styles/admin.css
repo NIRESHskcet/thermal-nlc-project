@@ -1,0 +1,40 @@
+body {
+    background: #fff;
+}
+
+.admin-shell {
+    min-height: 100vh;
+}
+
+.admin-content {
+    min-width: 0;
+}
+
+.admin-page-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.admin-table-wrap {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.admin-modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.35);
+}
+
+.profile-card,
+.dashboard-card {
+    border-radius: 0.25rem;
+}
+
+.dashboard-stat {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.bulk-action-bar {
+    border-color: var(--bs-border-color) !important;
+}
