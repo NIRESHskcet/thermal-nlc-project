@@ -1,7 +1,5 @@
 package com.thermal.nlc.dto;
 
-import com.thermal.nlc.model.Role;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +12,7 @@ import lombok.Setter;
 public class UserProfileDTO {
     private Integer id;
     private String username;
-    private Role role;
+    private String role;
     private Integer employeeId;
     private String employeeCode;
     private String employeeName;

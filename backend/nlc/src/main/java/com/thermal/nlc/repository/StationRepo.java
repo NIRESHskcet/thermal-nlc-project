@@ -20,4 +20,7 @@ public interface StationRepo extends JpaRepository<Station,Integer>{
         LOWER(st.location) LIKE LOWER(CONCAT('%',:keyword,'%'))
     """)
     List<Station> searchStation(@Param("keyword") String keyword);
+
+    boolean existsByStationNameIgnoreCase(String stationName);
+    boolean existsByStationNameIgnoreCaseAndStationIdNot(String stationName, Integer stationId);
 }

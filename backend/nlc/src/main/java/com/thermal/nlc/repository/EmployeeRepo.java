@@ -13,11 +13,15 @@ public interface EmployeeRepo extends JpaRepository<Employee,Integer> {
 
     @Query("""
         SELECT e FROM Employee e
+        LEFT JOIN e.createdBy cb
         WHERE 
         LOWER(e.employeeName) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
         LOWER(e.department) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
-        LOWER(e.role) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
+        LOWER(e.role.name) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
         LOWER(e.employeeCode) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
+        LOWER(e.station.stationName) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
+        LOWER(e.unit.unitName) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
+        LOWER(cb.username) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
         CAST(e.station.stationId AS String) LIKE %:keyword% OR
         CAST(e.unit.unitId AS String) LIKE %:keyword% OR
         LOWER(e.phone) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
@@ -27,4 +31,9 @@ public interface EmployeeRepo extends JpaRepository<Employee,Integer> {
 
     List<Employee> findByStation_StationId(Integer stationId);
     List<Employee> findByUnit_UnitId(Integer unitId);
+    List<Employee> findByCreatedBy_Id(Integer userId);
+    boolean existsByEmployeeCodeIgnoreCase(String employeeCode);
+    boolean existsByEmployeeCodeIgnoreCaseAndIdNot(String employeeCode, Integer id);
+    boolean existsByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Integer id);
 }

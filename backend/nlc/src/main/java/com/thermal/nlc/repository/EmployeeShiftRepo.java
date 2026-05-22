@@ -16,7 +16,9 @@ public interface EmployeeShiftRepo extends JpaRepository<EmployeeShift,Integer>{
         WHERE
         CAST(es.assignDate AS String) LIKE %:keyword% OR
         CAST(es.employee.id AS String) LIKE %:keyword% OR
-        CAST(es.shift.id AS String) LIKE %:keyword%
+        CAST(es.shift.id AS String) LIKE %:keyword% OR
+        LOWER(es.employee.employeeName) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
+        LOWER(es.shift.shiftName) LIKE LOWER(CONCAT('%',:keyword,'%'))
     """)
     List<EmployeeShift> searchEmployeeShift(@Param("keyword") String keyword);
 

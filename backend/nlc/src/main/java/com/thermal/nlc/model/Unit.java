@@ -4,6 +4,7 @@ import java.util.List;
 
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,6 +34,8 @@ public class Unit {
     @JoinColumn(name = "station_id")
     @NotNull(message = "station id is required")
     private Station station;
+    @NotBlank(message = "unit name is required")
+    @Column(nullable = false, unique = true)
     private String unitName;
     @NotBlank(message = "capacity is required")
     private String capacityMW;

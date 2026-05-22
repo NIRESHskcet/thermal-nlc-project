@@ -14,7 +14,7 @@ import { useCrudHandlers } from "../hooks/useCrudHandlers";
 import { usePermissions } from "../hooks/usePermissions";
 import { getErrorMessage } from "../utils/errorUtils";
 
-const ROLES = ["OPERATOR", "ADMIN", "HR"];
+const ROLES = ["ADMIN", "HR", "OPERATOR", "ENGINEER", "SUPERVISOR", "TECHNICIAN", "SAFETY_OFFICER"];
 
 const emptyUser = {
     employeeId: "",
@@ -115,6 +115,7 @@ function UsersPage() {
                 await usersService.update(editId, {
                     employeeId: Number(form.employeeId),
                     username: form.username,
+                    email: form.email,
                     role: form.role,
                 });
                 toast.success("User updated successfully.");
@@ -128,7 +129,7 @@ function UsersPage() {
                     username: form.username,
                     email: form.email,
                     password: form.password,
-                    role: form.role,
+                    role: { name: form.role },
                 });
                 toast.success("User created successfully.");
             }

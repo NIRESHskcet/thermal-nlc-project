@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,7 @@ public class EmployeeShift {
     @NotNull(message = "shiftId is required")
     private Shift shift;
     @NotNull(message = "Date and Time is required")
+    @PastOrPresent(message = "assign date cannot be in the future")
     private LocalDate assignDate;
 
 }

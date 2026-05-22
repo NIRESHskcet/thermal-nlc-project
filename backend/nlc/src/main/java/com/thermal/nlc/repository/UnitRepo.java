@@ -15,10 +15,15 @@ public interface UnitRepo extends JpaRepository<Unit,Integer>{
         SELECT u FROM Unit u
         WHERE
         CAST(u.station.stationId AS String) LIKE %:keyword% OR
+        LOWER(u.station.stationName) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
         LOWER(u.unitName) LIKE LOWER(CONCAT('%',:keyword,'%')) OR
         LOWER(u.capacityMW) LIKE LOWER(CONCAT('%',:keyword,'%'))
     """)
     List<Unit> searchUnit(@Param("keyword") String keyword);
 
     List<Unit> findByStation_StationId(Integer stationId);
+    boolean existsByUnitNameIgnoreCase(String unitName);
+    boolean existsByUnitNameIgnoreCaseAndUnitIdNot(String unitName, Integer unitId);
+    boolean existsByUnitNameIgnoreCaseAndStation_StationId(String unitName, Integer stationId);
+    boolean existsByUnitNameIgnoreCaseAndStation_StationIdAndUnitIdNot(String unitName, Integer stationId, Integer unitId);
 }

@@ -46,8 +46,10 @@ public class AuthService {
         LoginResponse response = new LoginResponse();
         response.setId(user.getId());
         response.setUsername(user.getUsername());
-        response.setRole(user.getRole());
-        response.setEmployeeId(user.getEmployee().getId());
+        response.setRole(resolveRoleName(user));
+        if (user.getEmployee() != null) {
+            response.setEmployeeId(user.getEmployee().getId());
+        }
         return response;
     }
 
@@ -55,19 +57,27 @@ public class AuthService {
         UserProfileDTO dto = new UserProfileDTO();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
-        dto.setRole(user.getRole());
-        dto.setEmployeeId(user.getEmployee().getId());
-        dto.setEmployeeCode(user.getEmployee().getEmployeeCode());
-        dto.setEmployeeName(user.getEmployee().getEmployeeName());
-        dto.setDepartment(user.getEmployee().getDepartment());
-        dto.setEmail(user.getEmail() != null ? user.getEmail() : user.getEmployee().getEmail());
-        dto.setPhone(user.getEmployee().getPhone());
-        if (user.getEmployee().getStation() != null) {
-            dto.setStationName(user.getEmployee().getStation().getStationName());
-        }
-        if (user.getEmployee().getUnit() != null) {
-            dto.setUnitName(user.getEmployee().getUnit().getUnitName());
+        dto.setRole(resolveRoleName(user));
+        if (user.getEmployee() != null) {
+            dto.setEmployeeId(user.getEmployee().getId());
+            dto.setEmployeeCode(user.getEmployee().getEmployeeCode());
+            dto.setEmployeeName(user.getEmployee().getEmployeeName());
+            dto.setDepartment(user.getEmployee().getDepartment());
+            dto.setEmail(user.getEmail() != null ? user.getEmail() : user.getEmployee().getEmail());
+            dto.setPhone(user.getEmployee().getPhone());
+            if (user.getEmployee().getStation() != null) {
+                dto.setStationName(user.getEmployee().getStation().getStationName());
+            }
+            if (user.getEmployee().getUnit() != null) {
+                dto.setUnitName(user.getEmployee().getUnit().getUnitName());
+            }
+        } else {
+            dto.setEmail(user.getEmail());
         }
         return dto;
+    }
+
+    private String resolveRoleName(Users user) {
+        return user.getRole() != null ? user.getRole().getName() : "OPERATOR";
     }
 }

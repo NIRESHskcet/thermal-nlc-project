@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.thermal.nlc.dto.UnitDTO;
+import com.thermal.nlc.exception.DuplicateResourceException;
 import com.thermal.nlc.exception.UnitNotFoundException;
 import com.thermal.nlc.model.Station;
 import com.thermal.nlc.model.Unit;
@@ -23,6 +24,7 @@ public class UnitService {
     private StationRepo stationRepo;
 
     public UnitDTO addUnit(Unit unit){
+        validateUnitName(unit.getUnitName(), unit.getStation() != null ? unit.getStation().getStationId() : null, null);
         Unit u = unitRepo.save(unit);
         UnitDTO dto = new UnitDTO();
         dto.setUnitId(u.getUnitId());
@@ -94,9 +96,12 @@ public class UnitService {
     
     public UnitDTO updateUnit(Integer id,UnitDTO unitDto){
         Unit existing = unitRepo.findById(id).orElseThrow(() -> new UnitNotFoundException("Unit not found with id "+id));
-        BeanUtils.copyProperties(unitDto, existing);
-        Station station = stationRepo.findById(unitDto.getStationId()).orElse(null);
+        Station station = stationRepo.findById(unitDto.getStationId())
+            .orElseThrow(() -> new UnitNotFoundException("Station not found with id "+unitDto.getStationId()));
+        validateUnitName(unitDto.getUnitName(), unitDto.getStationId(), id);
         existing.setStation(station);
+        existing.setUnitName(unitDto.getUnitName());
+        existing.setCapacityMW(unitDto.getCapacityMW());
         unitRepo.save(existing);
         UnitDTO response = new UnitDTO();
         BeanUtils.copyProperties(existing, response);
@@ -106,6 +111,16 @@ public class UnitService {
     }
 
     public void deleteUnit(Integer id){
-        unitRepo.deleteById(id);
+        Unit existing = unitRepo.findById(id).orElseThrow(() -> new UnitNotFoundException("Unit not found with id "+id));
+        unitRepo.delete(existing);
+    }
+
+    private void validateUnitName(String unitName, Integer stationId, Integer unitId) {
+        boolean duplicate = unitId == null
+            ? unitRepo.existsByUnitNameIgnoreCase(unitName)
+            : unitRepo.existsByUnitNameIgnoreCaseAndUnitIdNot(unitName, unitId);
+        if (duplicate) {
+            throw new DuplicateResourceException("Unit name already exists: " + unitName);
+        }
     }
 }

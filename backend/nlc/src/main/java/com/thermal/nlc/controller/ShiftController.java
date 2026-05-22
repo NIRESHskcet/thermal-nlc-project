@@ -52,7 +52,7 @@ public class ShiftController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<ShiftDTO> updateShift(@RequestBody ShiftDTO shiftDto,@PathVariable Integer id){
+    public ResponseEntity<ShiftDTO> updateShift(@Valid @RequestBody ShiftDTO shiftDto,@PathVariable Integer id){
         ShiftDTO shift2 = shiftService.updateShift(shiftDto,id);
         if(shift2 != null){
             return new ResponseEntity<>(shift2,HttpStatus.OK);

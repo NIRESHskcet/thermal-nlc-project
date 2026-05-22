@@ -12,10 +12,13 @@ import { useConfirmDelete } from "../hooks/useConfirmDelete";
 import { useCrudHandlers } from "../hooks/useCrudHandlers";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { usePermissions } from "../hooks/usePermissions";
+import { useAuth } from "../context/AuthContext";
 import { employeeService } from "../services/employeeService";
 import { stationService } from "../services/stationService";
 import { unitService } from "../services/unitService";
 import { getErrorMessage } from "../utils/errorUtils";
+
+const ROLE_OPTIONS = ["ADMIN", "HR", "OPERATOR", "ENGINEER", "SUPERVISOR", "TECHNICIAN", "SAFETY_OFFICER"];
 
 const initialEmployee = {
     employeeCode: "",
@@ -29,6 +32,7 @@ const initialEmployee = {
 };
 
 function EmployeePage() {
+    const { user } = useAuth();
     const { isReadOnly } = usePermissions();
     const { toast, handleError } = useCrudHandlers();
     const bulk = useBulkSelection("id");
@@ -173,6 +177,8 @@ function EmployeePage() {
         ...employee,
         station: { stationId: Number(employee.station.stationId) },
         unit: { unitId: Number(employee.unit.unitId) },
+        role: { name: employee.role },
+        createdBy: user?.id ? { id: Number(user.id) } : null,
     });
 
     const toUpdatePayload = () => ({
@@ -275,7 +281,12 @@ function EmployeePage() {
                 <input type="text" name="department" placeholder="Department" className="form-control" value={employee.department} onChange={handleChange} />
             </div>
             <div className="mb-3">
-                <input type="text" name="role" placeholder="Role" className="form-control" value={employee.role} onChange={handleChange} />
+                <select name="role" value={employee.role} className="form-select" onChange={handleChange}>
+                    <option value="">Select a role</option>
+                    {ROLE_OPTIONS.map((role) => (
+                        <option key={role} value={role}>{role}</option>
+                    ))}
+                </select>
             </div>
             <div className="mb-3">
                 <input type="text" name="phone" placeholder="Phone" className="form-control" value={employee.phone} onChange={handleChange} />
@@ -310,6 +321,7 @@ function EmployeePage() {
         { key: "stationName", label: "Station" },
         { key: "unitName", label: "Unit" },
         { key: "role", label: "Role" },
+        { key: "createdByUsername", label: "Created By" },
         { key: "phone", label: "Phone" },
         { key: "email", label: "Email" },
         { key: "createdAt", label: "Joined" },

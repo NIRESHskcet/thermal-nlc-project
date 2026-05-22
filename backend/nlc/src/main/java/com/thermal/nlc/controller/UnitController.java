@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thermal.nlc.dto.UnitDTO;
@@ -51,12 +52,12 @@ public class UnitController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<UnitDTO>> searchUnit(String keyword){
+    public ResponseEntity<List<UnitDTO>> searchUnit(@RequestParam String keyword){
         return new ResponseEntity<>(unitService.searchUnit(keyword),HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UnitDTO> updateUnit(@PathVariable Integer id,@RequestBody UnitDTO unitDto){
+    public ResponseEntity<UnitDTO> updateUnit(@PathVariable Integer id,@Valid @RequestBody UnitDTO unitDto){
         UnitDTO unit2 = unitService.getUnitById(id);
         if(unit2 != null){
             return new ResponseEntity<>(unitService.updateUnit(id,unitDto),HttpStatus.OK);

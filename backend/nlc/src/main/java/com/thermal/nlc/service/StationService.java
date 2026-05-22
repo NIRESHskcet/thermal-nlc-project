@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.thermal.nlc.dto.StationDTO;
+import com.thermal.nlc.exception.DuplicateResourceException;
 import com.thermal.nlc.exception.StationNotFoundException;
 import com.thermal.nlc.model.Station;
 import com.thermal.nlc.repository.StationRepo;
@@ -19,6 +20,7 @@ public class StationService {
     private StationRepo stationRepo;
 
     public StationDTO addStation(Station station){
+        validateStationName(station.getStationName(), null);
         Station s = stationRepo.save(station);
         StationDTO dto = new StationDTO();
         dto.setStationId(s.getStationId());;
@@ -70,7 +72,10 @@ public class StationService {
 
     public StationDTO updateStation(Integer id,StationDTO stationDto){
         Station existing = stationRepo.findById(id).orElseThrow(() -> new StationNotFoundException("Station not found with id "+id));
-        BeanUtils.copyProperties(stationDto, existing);
+        validateStationName(stationDto.getStationName(), id);
+        existing.setStationName(stationDto.getStationName());
+        existing.setLocation(stationDto.getLocation());
+        existing.setPrimaryFuelType(stationDto.getPrimaryFuelType());
         stationRepo.save(existing);
         StationDTO response = new StationDTO();
         BeanUtils.copyProperties(existing, response);
@@ -78,6 +83,16 @@ public class StationService {
     }
 
     public void deleteStation(Integer id){
-        stationRepo.deleteById(id);
+        Station existing = stationRepo.findById(id).orElseThrow(() -> new StationNotFoundException("Station not found with id "+id));
+        stationRepo.delete(existing);
+    }
+
+    private void validateStationName(String stationName, Integer stationId) {
+        boolean duplicate = stationId == null
+            ? stationRepo.existsByStationNameIgnoreCase(stationName)
+            : stationRepo.existsByStationNameIgnoreCaseAndStationIdNot(stationName, stationId);
+        if (duplicate) {
+            throw new DuplicateResourceException("Station name already exists: " + stationName);
+        }
     }
 }

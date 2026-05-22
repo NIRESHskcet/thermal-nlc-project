@@ -70,7 +70,7 @@ public class EmployeeShiftController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeShiftDTO> updateEmployeeShift(@PathVariable Integer id,@RequestBody EmployeeShiftDTO employeeShiftDto){
+    public ResponseEntity<EmployeeShiftDTO> updateEmployeeShift(@PathVariable Integer id,@Valid @RequestBody EmployeeShiftDTO employeeShiftDto){
         EmployeeShiftDTO employeeShift1 = shiftService.updateEmployeeShift(id,employeeShiftDto);
         if(employeeShift1 != null){
             return new ResponseEntity<>(employeeShift1,HttpStatus.OK);

@@ -5,6 +5,7 @@ import java.util.List;
 
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,6 +30,7 @@ public class Shift {
     @OneToMany(mappedBy = "shift",cascade = CascadeType.REMOVE)
     private List<EmployeeShift> employeeShift;
     @NotBlank(message = "Shift name is required")
+    @Column(nullable = false, unique = true)
     private String shiftName;
     @NotNull(message = "Start time is required")
     private LocalTime startTime;

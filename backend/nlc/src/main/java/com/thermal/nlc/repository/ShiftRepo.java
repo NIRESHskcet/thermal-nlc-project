@@ -18,4 +18,7 @@ public interface ShiftRepo extends JpaRepository<Shift,Integer>{
         CAST(s.endTime AS String) LIKE %:keyword%
     """)
     List<Shift> searchShift(@Param("keyword") String keyword);
+
+    boolean existsByShiftNameIgnoreCase(String shiftName);
+    boolean existsByShiftNameIgnoreCaseAndIdNot(String shiftName, Integer id);
 }

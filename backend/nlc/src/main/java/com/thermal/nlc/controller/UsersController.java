@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.thermal.nlc.dto.UserDTO;
-import com.thermal.nlc.model.Role;
 import com.thermal.nlc.model.Users;
 import com.thermal.nlc.service.UsersService;
 
@@ -49,7 +48,7 @@ public class UsersController {
     }
 
     @GetMapping("/role/{role}")
-    public ResponseEntity<List<UserDTO>> findByRole(@PathVariable Role role){
+    public ResponseEntity<List<UserDTO>> findByRole(@PathVariable String role){
         return new ResponseEntity<>(userService.findByRole(role),HttpStatus.OK);
     }
 
@@ -59,7 +58,7 @@ public class UsersController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUsers(@PathVariable Integer id,@RequestBody UserDTO userDto){
+    public ResponseEntity<UserDTO> updateUsers(@PathVariable Integer id,@Valid @RequestBody UserDTO userDto){
         UserDTO user2 = userService.getUserById(id);
         if(user2 != null){
             return new ResponseEntity<>(userService.updateUsers(id,userDto),HttpStatus.OK);

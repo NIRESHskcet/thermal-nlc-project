@@ -51,7 +51,7 @@ public class StationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StationDTO> updateStation(@PathVariable Integer id,@RequestBody StationDTO stationDto){
+    public ResponseEntity<StationDTO> updateStation(@PathVariable Integer id,@Valid @RequestBody StationDTO stationDto){
         StationDTO station2 = stationService.getStationById(id);
         if(station2 != null){
             return new ResponseEntity<>(stationService.updateStation(id,stationDto),HttpStatus.OK);

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.thermal.nlc.dto.ShiftDTO;
+import com.thermal.nlc.exception.BadRequestException;
+import com.thermal.nlc.exception.DuplicateResourceException;
 import com.thermal.nlc.exception.ShiftNotFoundException;
 import com.thermal.nlc.model.Shift;
 import com.thermal.nlc.repository.ShiftRepo;
@@ -19,6 +21,8 @@ public class ShiftService {
     private ShiftRepo shiftRepo;
 
     public ShiftDTO addShift(Shift shift){
+        validateShiftName(shift.getShiftName(), null);
+        validateShiftTiming(shift.getStartTime(), shift.getEndTime());
         Shift s = shiftRepo.save(shift);
         ShiftDTO dto = new ShiftDTO();
         dto.setId(s.getId());
@@ -70,7 +74,11 @@ public class ShiftService {
 
     public ShiftDTO updateShift(ShiftDTO shiftDto,Integer id){
         Shift existing = shiftRepo.findById(id).orElseThrow(() -> new ShiftNotFoundException("Shift not found with id "+id));
-        BeanUtils.copyProperties(shiftDto, existing);
+        validateShiftName(shiftDto.getShiftName(), id);
+        validateShiftTiming(shiftDto.getStartTime(), shiftDto.getEndTime());
+        existing.setShiftName(shiftDto.getShiftName());
+        existing.setStartTime(shiftDto.getStartTime());
+        existing.setEndTime(shiftDto.getEndTime());
         shiftRepo.save(existing);
         ShiftDTO response = new ShiftDTO();
         BeanUtils.copyProperties(existing, response);
@@ -78,6 +86,22 @@ public class ShiftService {
     }
 
     public void deleteShift(Integer id){
-        shiftRepo.deleteById(id);
+        Shift existing = shiftRepo.findById(id).orElseThrow(() -> new ShiftNotFoundException("Shift not found with id "+id));
+        shiftRepo.delete(existing);
+    }
+
+    private void validateShiftName(String shiftName, Integer id) {
+        boolean duplicate = id == null
+            ? shiftRepo.existsByShiftNameIgnoreCase(shiftName)
+            : shiftRepo.existsByShiftNameIgnoreCaseAndIdNot(shiftName, id);
+        if (duplicate) {
+            throw new DuplicateResourceException("Shift name already exists: " + shiftName);
+        }
+    }
+
+    private void validateShiftTiming(java.time.LocalTime startTime, java.time.LocalTime endTime) {
+        if (startTime != null && endTime != null && !endTime.isAfter(startTime)) {
+            throw new BadRequestException("Shift end time must be after start time.");
+        }
     }
 }

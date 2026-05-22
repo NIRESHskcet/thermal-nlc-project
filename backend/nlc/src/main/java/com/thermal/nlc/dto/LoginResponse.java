@@ -1,7 +1,5 @@
 package com.thermal.nlc.dto;
 
-import com.thermal.nlc.model.Role;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +12,6 @@ import lombok.Setter;
 public class LoginResponse {
     private Integer id;
     private String username;
-    private Role role;
+    private String role;
     private Integer employeeId;
 }

@@ -3,7 +3,6 @@ package com.thermal.nlc.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +27,20 @@ public class EmployeeShiftService {
     private ShiftRepo shift_Repo;
 
     public EmployeeShiftDTO addEmployeeShift(EmployeeShift shift){
+        Integer employeeId = shift.getEmployee() != null ? shift.getEmployee().getId() : null;
+        Integer shiftId = shift.getShift() != null ? shift.getShift().getId() : null;
+        if (employeeId == null) {
+            throw new EmployeeShiftNotFoundException("Employee id is required");
+        }
+        if (shiftId == null) {
+            throw new EmployeeShiftNotFoundException("Shift id is required");
+        }
+        Employee employee = employeeRepo.findById(employeeId)
+            .orElseThrow(() -> new EmployeeShiftNotFoundException("Employee not found with id "+employeeId));
+        Shift assignedShift = shift_Repo.findById(shiftId)
+            .orElseThrow(() -> new EmployeeShiftNotFoundException("Shift not found with id "+shiftId));
+        shift.setEmployee(employee);
+        shift.setShift(assignedShift);
         EmployeeShift es =  shiftRepo.save(shift);
         EmployeeShiftDTO dto = new EmployeeShiftDTO();
         dto.setId(es.getId());
@@ -125,22 +138,26 @@ public class EmployeeShiftService {
 
     public EmployeeShiftDTO updateEmployeeShift(Integer id,EmployeeShiftDTO employeeShiftDto){
         EmployeeShift existing = shiftRepo.findById(id).orElseThrow(() -> new EmployeeShiftNotFoundException("EmployeeShift not found with id "+id));
-        BeanUtils.copyProperties(employeeShiftDto, existing);
-        Employee employee = employeeRepo.findById(employeeShiftDto.getEmployeeId()).orElse(null);
-        Shift shift = shift_Repo.findById(employeeShiftDto.getShiftId()).orElse(null);
+        Employee employee = employeeRepo.findById(employeeShiftDto.getEmployeeId())
+            .orElseThrow(() -> new EmployeeShiftNotFoundException("Employee not found with id "+employeeShiftDto.getEmployeeId()));
+        Shift shift = shift_Repo.findById(employeeShiftDto.getShiftId())
+            .orElseThrow(() -> new EmployeeShiftNotFoundException("Shift not found with id "+employeeShiftDto.getShiftId()));
         existing.setEmployee(employee);
         existing.setShift(shift);
+        existing.setAssignDate(employeeShiftDto.getAssignDate());
         EmployeeShift updated = shiftRepo.save(existing);
         EmployeeShiftDTO response = new EmployeeShiftDTO();
-        BeanUtils.copyProperties(updated, response);
+        response.setId(updated.getId());
         response.setEmployeeId(updated.getEmployee().getId());
         response.setShiftId(updated.getShift().getId());
         response.setEmployeeName(updated.getEmployee().getEmployeeName());
         response.setShiftName(updated.getShift().getShiftName());
+        response.setAssignDate(updated.getAssignDate());
         return response;
     }
 
     public void deleteEmployeeShift(Integer id){
-        shiftRepo.deleteById(id);
+        EmployeeShift existing = shiftRepo.findById(id).orElseThrow(() -> new EmployeeShiftNotFoundException("EmployeeShift not found with id "+id));
+        shiftRepo.delete(existing);
     }
 }
