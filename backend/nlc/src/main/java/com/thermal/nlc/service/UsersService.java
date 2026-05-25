@@ -17,6 +17,7 @@ import com.thermal.nlc.model.Users;
 import com.thermal.nlc.repository.EmployeeRepo;
 import com.thermal.nlc.repository.RoleRepo;
 import com.thermal.nlc.repository.UsersRepo;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class UsersService {
@@ -31,6 +32,9 @@ public class UsersService {
     @Autowired
     private RoleRepo roleRepo;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public UserDTO addUsers(Users user) {
         Integer employeeId = user.getEmployee() != null ? user.getEmployee().getId() : null;
         validateUniqueUser(user.getUsername(), employeeId, null);
@@ -40,6 +44,7 @@ public class UsersService {
         }
         user.setEmployee(resolveEmployee(employeeId));
         user.setRole(resolveRole(user.getRole() != null ? user.getRole().getName() : null, user.getRole() != null ? user.getRole().getId() : null));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return toDto(userRepo.save(user));
     }
 

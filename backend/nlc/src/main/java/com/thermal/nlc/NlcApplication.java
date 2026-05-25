@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.thermal.nlc.model.Employee;
 import com.thermal.nlc.model.EmployeeShift;
@@ -30,6 +31,12 @@ import com.thermal.nlc.repository.UsersRepo;
 public class NlcApplication {
 
 	public static void main(String[] args) {
+		org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder = 
+			new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+		System.out.println("=== HASH ===");
+		System.out.println(encoder.encode("Password123"));
+		System.out.println("============");
+		
 		SpringApplication.run(NlcApplication.class, args);
 	}
 
@@ -42,7 +49,8 @@ public class NlcApplication {
 			UsersRepo usersRepo,
 			ShiftRepo shiftRepo,
 			EmployeeShiftRepo employeeShiftRepo,
-			JdbcTemplate jdbcTemplate) {
+			JdbcTemplate jdbcTemplate,
+			PasswordEncoder passwordEncoder) {
 		return args -> {
 			// 1. Seed Roles
 			List<String> roles = List.of("ADMIN", "HR", "OPERATOR", "ENGINEER", "SUPERVISOR", "TECHNICIAN", "SAFETY_OFFICER");
@@ -108,7 +116,7 @@ public class NlcApplication {
 				newUser.setEmployee(employee);
 				newUser.setUsername("admin");
 				newUser.setEmail("admin@nlc.com");
-				newUser.setPassword("Password123");
+				newUser.setPassword(passwordEncoder.encode("Password123"));
 				newUser.setRole(adminRole);
 				newUser.setCreatedAt(LocalDateTime.now());
 				user = usersRepo.save(newUser);

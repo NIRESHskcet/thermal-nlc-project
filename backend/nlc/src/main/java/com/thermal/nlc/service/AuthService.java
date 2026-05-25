@@ -3,6 +3,7 @@ package com.thermal.nlc.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.thermal.nlc.dto.ChangePasswordRequest;
@@ -11,6 +12,7 @@ import com.thermal.nlc.dto.UserProfileDTO;
 import com.thermal.nlc.exception.UserNotFoundException;
 import com.thermal.nlc.model.Users;
 import com.thermal.nlc.repository.UsersRepo;
+import com.thermal.nlc.security.JwtUtil;
 
 @Service
 public class AuthService {
@@ -18,13 +20,25 @@ public class AuthService {
     @Autowired
     private UsersRepo usersRepo;
 
-    /**
-     * Validates credentials against registered Users records only.
-     */
+    @Autowired
+    private JwtUtil jwtUtil;                  // ← ADD
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;  // ← ADD
+
     public Optional<LoginResponse> login(String username, String password) {
-        return usersRepo.findByUsernameIgnoreCase(username.trim())
-                .filter(user -> user.getPassword() != null && user.getPassword().equals(password))
-                .map(this::toLoginResponse);
+    return usersRepo.findByUsernameIgnoreCase(username.trim())
+            .filter(user -> {
+                System.out.println("=== LOGIN DEBUG ===");
+                System.out.println("Found user: " + user.getUsername());
+                System.out.println("DB password: [" + user.getPassword() + "]");
+                System.out.println("Input password: [" + password + "]");
+                boolean match = passwordEncoder.matches(password, user.getPassword());
+                System.out.println("Match result: " + match);
+                System.out.println("===================");
+                return user.getPassword() != null && match;
+            })
+            .map(this::toLoginResponse);
     }
 
     public Optional<UserProfileDTO> getProfile(Integer userId) {
@@ -34,10 +48,11 @@ public class AuthService {
     public boolean changePassword(ChangePasswordRequest request) {
         Users user = usersRepo.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found with id " + request.getUserId()));
-        if (user.getPassword() == null || !user.getPassword().equals(request.getCurrentPassword())) {
+        if (user.getPassword() == null
+                || !passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {  // ← BCrypt check
             return false;
         }
-        user.setPassword(request.getNewPassword());
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));  // ← BCrypt encode
         usersRepo.save(user);
         return true;
     }
@@ -46,10 +61,12 @@ public class AuthService {
         LoginResponse response = new LoginResponse();
         response.setId(user.getId());
         response.setUsername(user.getUsername());
-        response.setRole(resolveRoleName(user));
+        String role = resolveRoleName(user);
+        response.setRole(role);
         if (user.getEmployee() != null) {
             response.setEmployeeId(user.getEmployee().getId());
         }
+        response.setToken(jwtUtil.generateToken(user.getUsername(), role));  // ← ADD
         return response;
     }
 
